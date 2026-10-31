@@ -102,11 +102,14 @@
       this.completedTrades = [];
       this.activeContractId = null;
 
+      this.mockSimulation = !!options.mockSimulation;
+      this._listeners = {};
+
       // Strategy parameters
       this.strategy = null;
-      this.stake = 1.0;
-      this.lookback = 3;
-      this.marketFilter = "all"; // 'standard' | 'one-second' | 'all'
+      this.stake = Number(options.stake) || 1.0;
+      this.lookback = Number(options.lookback) || 3;
+      this.marketFilter = options.marketFilter || "all"; // 'standard' | 'one-second' | 'all'
 
       // Callbacks
       this.callbacks = {
@@ -123,10 +126,106 @@
 
       this._messageListener = (event) => {
         try {
-          const msg = JSON.parse(event.data);
+          const raw = typeof event.data === "string" ? event.data : event.data.toString();
+          const msg = JSON.parse(raw);
           this.handleMessage(msg);
         } catch (err) {
           // Ignore unparseable frames
+        }
+      };
+    }
+
+    /**
+     * Subscribe to trader lifecycle events (EventEmitter style)
+     */
+    on(event, handler) {
+      if (typeof handler !== "function") return this;
+      if (!this._listeners[event]) this._listeners[event] = [];
+      this._listeners[event].push(handler);
+      return this;
+    }
+
+    /**
+     * Emit lifecycle events to both registered callbacks and on() listeners
+     */
+    emit(event, ...args) {
+      const cbMap = {
+        connected: "onConnected",
+        statusChange: "onStatusChange",
+        stateChange: "onStatusChange",
+        marketsLoaded: "onMarketsLoaded",
+        tick: "onTick",
+        signalMatch: "onSignalMatch",
+        tradePlaced: "onTradePlaced",
+        tradeTick: "onTradeTick",
+        tradeClosed: "onTradeClosed",
+        sequenceComplete: "onSequenceComplete",
+        error: "onError"
+      };
+
+      const cbKey = cbMap[event] || event;
+      if (typeof this.callbacks[cbKey] === "function") {
+        try { this.callbacks[cbKey](...args); } catch (e) { console.error(e); }
+      }
+
+      if (this._listeners && Array.isArray(this._listeners[event])) {
+        for (const fn of this._listeners[event]) {
+          try { fn(...args); } catch (e) { console.error(e); }
+        }
+      }
+
+      // Also trigger stateChange listener if statusChange is fired
+      if (event === "statusChange" && this._listeners && Array.isArray(this._listeners["stateChange"])) {
+        for (const fn of this._listeners["stateChange"]) {
+          try { fn({ state: args[0], message: args[1] }); } catch (e) { console.error(e); }
+        }
+      }
+    }
+
+    /**
+     * Extract exact last digit from quote using decimal pip precision
+     */
+    extractDigit(quote, pipSize = 2) {
+      const num = Number(quote);
+      return Number(num.toFixed(Number(pipSize ?? 2)).slice(-1));
+    }
+
+    /**
+     * Check if digit history matches the strategy pattern
+     */
+    checkSignal(strategy, history) {
+      const strat = strategy || this.strategy;
+      const lookback = strat.lookback || this.lookback || 3;
+      if (!Array.isArray(history) || history.length < lookback) return false;
+      const slice = history.slice(-lookback);
+      if (strat.direction === "over") {
+        return slice.every((d) => d <= strat.barrier);
+      } else if (strat.direction === "under") {
+        return slice.every((d) => d >= strat.barrier);
+      }
+      return false;
+    }
+
+    /**
+     * Build direct Deriv Buy payload
+     */
+    buildBuyPayload(strategy, symbol, stake = this.stake, currency = this.currency || "USD") {
+      const strat = strategy || this.strategy;
+      const contractType = strat.direction === "over" ? "DIGITOVER" : "DIGITUNDER";
+      const barrier = strat.barrier;
+      return {
+        buy: "1",
+        price: Number(stake),
+        parameters: {
+          amount: Number(stake),
+          basis: "stake",
+          contract_type: contractType,
+          currency: currency,
+          duration: 1,
+          duration_unit: "t",
+          underlying_symbol: symbol,
+          barrier: barrier,
+          selected_tick: barrier
         }
       };
     }
@@ -139,6 +238,8 @@
         if (this.ws.readyState === WebSocket.OPEN) {
           this._bindWsEvents();
           if (this.token) await this.authorize(this.token);
+          this.emit("connected");
+          this.emit("statusChange", "connected", "Connected to WebSocket.");
           return this.ws;
         }
         return new Promise((resolve, reject) => {
@@ -147,6 +248,8 @@
             if (this.token) {
               try { await this.authorize(this.token); } catch (e) { return reject(e); }
             }
+            this.emit("connected");
+            this.emit("statusChange", "connected", "Connected to WebSocket.");
             resolve(this.ws);
           }, { once: true });
           this.ws.addEventListener("error", reject, { once: true });
@@ -154,7 +257,7 @@
       }
 
       return new Promise((resolve, reject) => {
-        this.callbacks.onStatusChange("connecting", "Connecting to Deriv WebSocket...");
+        this.emit("statusChange", "connecting", "Connecting to Deriv WebSocket...");
         this.ws = new WebSocket(this.wsUrl);
         this._bindWsEvents();
 
@@ -163,15 +266,17 @@
             if (this.token) {
               await this.authorize(this.token);
             }
-            this.callbacks.onStatusChange("connected", "Connected to Deriv WebSocket.");
+            this.emit("connected");
+            this.emit("statusChange", "connected", "Connected to Deriv WebSocket.");
             resolve(this.ws);
           } catch (err) {
+            this.emit("error", err);
             reject(err);
           }
         };
 
         this.ws.onerror = (err) => {
-          this.callbacks.onError(err);
+          this.emit("error", err);
           reject(err);
         };
       });
@@ -202,7 +307,8 @@
 
         const handler = (event) => {
           try {
-            const msg = JSON.parse(event.data);
+            const raw = typeof event.data === "string" ? event.data : event.data.toString();
+            const msg = JSON.parse(raw);
             if (msg.req_id === reqId) {
               clearTimeout(timeout);
               this.ws.removeEventListener("message", handler);
@@ -230,6 +336,40 @@
         this.currency = res.authorize.currency;
       }
       return res.authorize;
+    }
+
+    /**
+     * Fetch and filter active volatility symbols from Deriv
+     */
+    async fetchActiveSymbols(filter = this.marketFilter || "all") {
+      const res = await this.send({ active_symbols: "brief" });
+      const activeSymbols = res.active_symbols || [];
+
+      const is1s = (sym) => /^1HZ\d+V$/i.test(sym.symbol);
+      const isStandardVol = (sym) => /^R_\d+$/i.test(sym.symbol) || sym.submarket === "random_index";
+
+      const markets = activeSymbols.filter((s) => {
+        if (Number(s.is_trading_suspended) === 1) return false;
+        const matchVol = isStandardVol(s) || is1s(s);
+        if (!matchVol) return false;
+
+        if (filter === "one-second") return is1s(s);
+        if (filter === "standard") return !is1s(s);
+        return true;
+      });
+
+      markets.sort((a, b) => Number(a.display_order || 0) - Number(b.display_order || 0));
+      return markets;
+    }
+
+    /**
+     * Start AI Scanner (convenience wrapper)
+     */
+    start(strategy, options = {}) {
+      if (typeof strategy === "object" && !strategy.direction && !strategy.barrier && strategy.strategy) {
+        return this.startScanner(strategy);
+      }
+      return this.startScanner({ strategy, ...options });
     }
 
     /**
@@ -269,7 +409,7 @@
       this.digitHistories.clear();
       this.tickSubscriptions.clear();
 
-      this.callbacks.onStatusChange("loading", "Initializing market feeds...");
+      this.emit("statusChange", "loading", "Initializing market feeds...");
 
       // Close any previous tick streams
       try {
@@ -277,31 +417,17 @@
       } catch {}
 
       // 1. Fetch Volatility Markets
-      const res = await this.send({ active_symbols: "brief" });
-      const activeSymbols = res.active_symbols || [];
-
-      const is1s = (sym) => /^1HZ\d+V$/i.test(sym.symbol);
-      const isStandardVol = (sym) => /^R_\d+$/i.test(sym.symbol) || sym.submarket === "random_index";
-
-      const markets = activeSymbols.filter((s) => {
-        if (Number(s.is_trading_suspended) === 1) return false;
-        const matchVol = isStandardVol(s) || is1s(s);
-        if (!matchVol) return false;
-
-        if (this.marketFilter === "one-second") return is1s(s);
-        if (this.marketFilter === "standard") return !is1s(s);
-        return true;
-      });
+      const markets = await this.fetchActiveSymbols(this.marketFilter);
 
       if (!markets.length) {
         this.stop();
         throw new Error("No active volatility markets found matching filter.");
       }
 
-      markets.sort((a, b) => Number(a.display_order || 0) - Number(b.display_order || 0));
-      this.callbacks.onMarketsLoaded(markets);
+      this.emit("marketsLoaded", markets);
 
-      this.callbacks.onStatusChange(
+      this.emit(
+        "statusChange",
         "scanning",
         `Scanning ${markets.length} markets for pattern [${this.strategy.name || `${this.strategy.direction.toUpperCase()} ${this.strategy.barrier}`} (lookback: ${this.lookback})]...`
       );
@@ -340,26 +466,20 @@
       // Decimal precision pip size
       const quote = Number(tick.quote);
       const pipSize = Number(tick.pip_size ?? 2);
-      const lastDigit = Number(quote.toFixed(pipSize).slice(-1));
+      const lastDigit = this.extractDigit(quote, pipSize);
 
       // Update historical digits buffer
       const history = [...(this.digitHistories.get(symbol) || []), lastDigit].slice(-this.lookback);
       this.digitHistories.set(symbol, history);
 
       // Check entry pattern match condition
-      let isMatch = false;
-      if (history.length === this.lookback) {
-        if (this.strategy.direction === "over") {
-          isMatch = history.every((d) => d <= this.strategy.barrier);
-        } else if (this.strategy.direction === "under") {
-          isMatch = history.every((d) => d >= this.strategy.barrier);
-        }
-      }
+      const isMatch = this.checkSignal(this.strategy, history);
 
-      this.callbacks.onTick({
+      this.emit("tick", {
         symbol,
         quote,
         pipSize,
+        digit: lastDigit,
         lastDigit,
         history,
         isMatch,
@@ -371,8 +491,10 @@
         this.lockedSymbol = symbol;
         this.isTrading = true;
 
-        this.callbacks.onSignalMatch(symbol, history, this.strategy);
-        this.callbacks.onStatusChange(
+        this.emit("signal", { symbol, history, strategy: this.strategy });
+        this.emit("signalMatch", symbol, history, this.strategy);
+        this.emit(
+          "statusChange",
           "trading",
           `Signal matched on ${symbol}! History: [${history.join(", ")}]. Executing trade ${this.totalTradesPlanned - this.tradesRemaining + 1}/${this.totalTradesPlanned}...`
         );
@@ -393,21 +515,68 @@
       const contractType = this.strategy.direction === "over" ? "DIGITOVER" : "DIGITUNDER";
       const barrier = this.strategy.barrier;
 
-      const buyPayload = {
-        buy: "1",
-        price: this.stake,
-        parameters: {
-          amount: this.stake,
-          basis: "stake",
-          contract_type: contractType,
-          currency: this.currency || "USD",
-          duration: 1,
-          duration_unit: "t",
-          underlying_symbol: symbol,
-          barrier: barrier,
-          selected_tick: barrier
+      // Simulated trade resolution for demo testing without authorized token
+      if (this.mockSimulation) {
+        this.activeContractId = `sim_${Date.now()}`;
+        const contractId = this.activeContractId;
+        const buyPrice = this.stake;
+
+        this.emit("tradePlaced", {
+          contractId,
+          transactionId: Date.now(),
+          symbol,
+          contractType,
+          stake: this.stake,
+          buyPrice,
+          balanceAfter: 10000
+        });
+
+        // Await 1.2s to simulate 1-tick contract lifecycle
+        await new Promise((resolve) => setTimeout(resolve, 1200));
+
+        const exitDigit = Math.floor(Math.random() * 10);
+        const isWin = (contractType === "DIGITOVER" && exitDigit > barrier) ||
+                      (contractType === "DIGITUNDER" && exitDigit < barrier);
+        const payoutRate = contractType === "DIGITOVER" ? (barrier === 1 ? 0.23 : barrier === 2 ? 0.38 : 0.60) :
+                                                          (barrier === 8 ? 0.23 : barrier === 7 ? 0.38 : 0.60);
+        const profit = isWin ? Number((this.stake * payoutRate).toFixed(2)) : -this.stake;
+
+        this.tradesRemaining -= 1;
+        const tradeRecord = {
+          contractId,
+          symbol,
+          contractType,
+          stake: this.stake,
+          profit,
+          isWin,
+          entryTick: 1000.50,
+          exitTick: 1000.50 + exitDigit * 0.01,
+          exitDigit,
+          barrier,
+          result: isWin ? "win" : "loss",
+          closedAt: new Date().toISOString()
+        };
+
+        this.completedTrades.push(tradeRecord);
+        this.emit("tradeClosed", tradeRecord);
+        this.activeContractId = null;
+
+        if (this.tradesRemaining <= 0) {
+          this.emit("statusChange", "complete", "All trades in sequence successfully executed.");
+          const summary = this.getSummary();
+          this.emit("sequenceComplete", summary);
+          this.stop();
+        } else {
+          this.emit(
+            "statusChange",
+            "trading",
+            `Trade finished (${isWin ? "WIN" : "LOSS"}: ${profit >= 0 ? "+" : ""}${profit.toFixed(2)}). ${this.tradesRemaining} remaining in sequence...`
+          );
         }
-      };
+        return;
+      }
+
+      const buyPayload = this.buildBuyPayload(this.strategy, symbol, this.stake, this.currency);
 
       try {
         this.activeContractId = "pending";
@@ -425,7 +594,7 @@
         const contractId = buyData.contract_id;
         this.activeContractId = contractId;
 
-        this.callbacks.onTradePlaced({
+        this.emit("tradePlaced", {
           contractId,
           transactionId: buyData.transaction_id,
           symbol,
@@ -457,18 +626,19 @@
         };
 
         this.completedTrades.push(tradeRecord);
-        this.callbacks.onTradeClosed(tradeRecord);
+        this.emit("tradeClosed", tradeRecord);
 
         this.activeContractId = null;
 
         if (this.tradesRemaining <= 0) {
           // Sequence completed!
-          this.callbacks.onStatusChange("complete", "All trades in sequence successfully executed.");
+          this.emit("statusChange", "complete", "All trades in sequence successfully executed.");
           const summary = this.getSummary();
-          this.callbacks.onSequenceComplete(summary);
+          this.emit("sequenceComplete", summary);
           this.stop();
         } else {
-          this.callbacks.onStatusChange(
+          this.emit(
+            "statusChange",
             "trading",
             `Trade finished (${isWin ? "WIN" : "LOSS"}: ${profit >= 0 ? "+" : ""}${profit.toFixed(2)}). ${this.tradesRemaining} remaining in sequence...`
           );
@@ -502,7 +672,8 @@
 
         const listener = (event) => {
           try {
-            const msg = JSON.parse(event.data);
+            const raw = typeof event.data === "string" ? event.data : event.data.toString();
+            const msg = JSON.parse(raw);
             if (msg.msg_type === "proposal_open_contract") {
               const poc = msg.proposal_open_contract;
               if (poc && String(poc.contract_id) === String(contractId)) {
@@ -559,7 +730,7 @@
         } catch {}
       }
 
-      this.callbacks.onStatusChange("idle", "Scanner stopped.");
+      this.emit("statusChange", "idle", "Scanner stopped.");
     }
 
     /**
