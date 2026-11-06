@@ -7,7 +7,7 @@ const jsFile = path.join(distDir, 'static', 'js', 'index.39f61533.js');
 const chunkFile = path.join(distDir, 'static', 'js', 'async', '698.5f7f5ff5.js');
 
 // Default placeholder values currently in the codebase
-const PLACEHOLDER_APP_ID = '34wExKGcosNmrNxUVnpJ9';
+const PLACEHOLDER_APP_ID = '34J0u7zObmeCX5lnl8zm7';
 const PLACEHOLDER_REFERRAL = 'https://t.deriv.link?t=33VBNTNRX9DY';
 
 // Load variables from .env file if it exists

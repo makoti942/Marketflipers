@@ -1,5 +1,5 @@
-// Service Worker for NaoTraders PWA
-const CACHE_NAME = 'naotraders-cache-v1';
+// Service Worker for Dylan Trades PWA
+const CACHE_NAME = 'dylantrades-cache-v1';
 
 self.addEventListener('install', (event) => {
     self.skipWaiting();
