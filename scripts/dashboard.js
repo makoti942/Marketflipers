@@ -1,4 +1,4 @@
-/* NaoTraders Premium Dashboard Controller */
+/* Dylan Trades Premium Dashboard Controller */
 
 (function () {
     const SIMULATION_ACCOUNT_IDS = new Set(['ROT91160344', 'ROT91181979']);
@@ -16,8 +16,8 @@
 
             <!-- Brand / Logo -->
             <div class="db-sidebar-brand">
-                <img class="brand-logo-img" src="/images/naotrades.png" alt="NaoTraders Logo" />
-                <span class="brand-text">NaoTraders</span>
+                <img class="brand-logo-img" src="/images/dylantrades.svg" alt="Dylan Trades Logo" />
+                <span class="brand-text">Dylan Trades</span>
             </div>
 
             <!-- Navigation Links -->
@@ -144,7 +144,7 @@
                     <span class="db-partner-subtitle">Partner Referral</span>
                     <h2 class="db-partner-title">Master Partner share</h2>
                 </div>
-                <button class="db-partner-btn" onclick="window.open('https://naotraders.com/referral', '_blank')">Earn monthly</button>
+                <button class="db-partner-btn" onclick="window.open('https://dylantrades.site/referral', '_blank')">Earn monthly</button>
             </div>
         </main>
     `;
@@ -214,7 +214,7 @@
         }
         if (navReferral) {
             navReferral.addEventListener('click', () => {
-                window.open('https://naotraders.com/referral', '_blank');
+                window.open('https://dylantrades.site/referral', '_blank');
             });
         }
 

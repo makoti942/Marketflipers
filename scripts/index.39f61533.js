@@ -1224,7 +1224,7 @@
         ),
         block_delete: (0, o.NC)("You’ve just deleted a block."),
         invalid_xml: (0, o.NC)(
-          "Your import failed due to an invalid file. Try uploading on OLD Binarytool.",
+          "Your import failed due to an invalid file. Try uploading on the old platform.",
         ),
         BOT_IMPORT: (0, o.NC)("You’ve successfully imported a bot."),
         BOT_DELETE: (0, o.NC)("You’ve successfully deleted a bot."),
@@ -2349,31 +2349,19 @@
         };
       n("30645");
       var o = n("58454");
-      let s = { LOCALHOST: "34wExKGcosNmrNxUVnpJ9", STAGING: "34wExKGcosNmrNxUVnpJ9", PRODUCTION: "34wExKGcosNmrNxUVnpJ9" },
+      let s = { LOCALHOST: "34J0u7zObmeCX5lnl8zm7", STAGING: "34J0u7zObmeCX5lnl8zm7", PRODUCTION: "34J0u7zObmeCX5lnl8zm7" },
         r = "force_legacy_oauth_flow",
         d = {
-          "naotraders.com": {
-            legacy_app_id: "34wExKGcosNmrNxUVnpJ9",
-            new_app_id: "34wExKGcosNmrNxUVnpJ9",
+          "dylantrades.site": {
+            legacy_app_id: "34J0u7zObmeCX5lnl8zm7",
+            new_app_id: "34J0u7zObmeCX5lnl8zm7",
           },
-          "www.naotraders.com": {
-            legacy_app_id: "34wExKGcosNmrNxUVnpJ9",
-            new_app_id: "34wExKGcosNmrNxUVnpJ9",
-          },
-          "prepaleolithic-dewayne-armigeral.ngrok-free.dev": {
-            legacy_app_id: "34wExKGcosNmrNxUVnpJ9",
-            new_app_id: "34wExKGcosNmrNxUVnpJ9",
-          },
-          "copytrading.naotraders.com": {
-            legacy_app_id: "34wExKGcosNmrNxUVnpJ9",
-            new_app_id: "34wExKGcosNmrNxUVnpJ9",
-          },
-          "new.naotraders.com": {
-            legacy_app_id: "34wExKGcosNmrNxUVnpJ9",
-            new_app_id: "34wExKGcosNmrNxUVnpJ9",
+          "www.dylantrades.site": {
+            legacy_app_id: "34J0u7zObmeCX5lnl8zm7",
+            new_app_id: "34J0u7zObmeCX5lnl8zm7",
           },
         },
-        c = () => d["www.naotraders.com"],
+        c = () => d["dylantrades.site"],
         u = () => {
           let e = h();
           return (e && d[e]) || c();
@@ -4888,7 +4876,7 @@
                           children: [
                             (0, i.jsx)("span", {
                               className: "cl__logo-db",
-                              children: "Nao",
+                              children: "Dylan ",
                             }),
                             (0, i.jsx)("span", {
                               className: "cl__logo-traders",
@@ -4922,7 +4910,7 @@
                       children: [
                         (0, i.jsx)("h2", {
                           className: "cl__welcome-title",
-                          children: "Welcome to NaoTraders",
+                          children: "Welcome to Dylan Trades",
                         }),
                         (0, i.jsx)("p", {
                           className: "cl__welcome-sub",
@@ -5938,7 +5926,7 @@
           type: "text",
           content: [
             (0, i.NC)(
-              "These are the trade parameters used for D’Alembert strategy in Binarytools.",
+              "These are the trade parameters used for D’Alembert strategy in Dylan Trades.",
             ),
           ],
         },
@@ -6011,7 +5999,7 @@
           type: "text",
           content: [
             (0, i.NC)(
-              "With Binarytools, traders can set the profit and loss thresholds to secure potential profits and limit potential losses. This means that the trading bot will automatically stop when either the profit or loss thresholds are reached. It's a form of risk management that can potentially enhance returns. For example, if a trader sets the profit threshold at 100 USD and the strategy exceeds 100 USD of profit from all trades, then the bot will stop running.",
+              "With Dylan Trades, traders can set the profit and loss thresholds to secure potential profits and limit potential losses. This means that the trading bot will automatically stop when either the profit or loss thresholds are reached. It's a form of risk management that can potentially enhance returns. For example, if a trader sets the profit threshold at 100 USD and the strategy exceeds 100 USD of profit from all trades, then the bot will stop running.",
             ),
           ],
         },
@@ -6087,7 +6075,7 @@
           type: "text",
           content: [
             (0, i.NC)(
-              "The D'Alembert system offers more balanced trading through controlled stake progression. With prudent risk management like stake limits, it can be effectively automated in Binarytools. However, traders should thoroughly assess their risk appetite, test strategies on a demo account to align with their trading style before trading with real money. This allows optimising the approach and striking a balance between potential gains and losses whilst managing risk.",
+              "The D'Alembert system offers more balanced trading through controlled stake progression. With prudent risk management like stake limits, it can be effectively automated in Dylan Trades. However, traders should thoroughly assess their risk appetite, test strategies on a demo account to align with their trading style before trading with real money. This allows optimising the approach and striking a balance between potential gains and losses whilst managing risk.",
             ),
           ],
         },
@@ -6128,7 +6116,7 @@
                 "The Martingale strategy involves increasing your stake after each loss to recoup prior losses with a single successful trade.",
               ),
               (0, i.NC)(
-                "This article explores the Martingale strategy integrated into Binarytools, a versatile trading bot designed to trade assets such as forex, commodities, and derived indices. We will delve into the strategy's core parameters, its application, and provide essential takeaways for traders looking to use the bot effectively.",
+                "This article explores the Martingale strategy integrated into Dylan Trades, a versatile trading bot designed to trade assets such as forex, commodities, and derived indices. We will delve into the strategy's core parameters, its application, and provide essential takeaways for traders looking to use the bot effectively.",
               ),
             ],
           },
@@ -6209,7 +6197,7 @@
             type: "text",
             content: [
               (0, i.NC)(
-                "The idea is that successful trades may recoup previous losses. However, it is crucial to exercise caution as the risk can quickly increase with this strategy. With Binarytools, you can minimise your risk by setting a maximum stake. This is an optional risk management feature. Let’s say a maximum stake of 3 USD. If your stake for the next trade is set to exceed 3 USD, your stake will reset to the initial stake of 1 USD. If you didn't set a maximum stake, it would have increased beyond 3 USD.",
+                "The idea is that successful trades may recoup previous losses. However, it is crucial to exercise caution as the risk can quickly increase with this strategy. With Dylan Trades, you can minimise your risk by setting a maximum stake. This is an optional risk management feature. Let’s say a maximum stake of 3 USD. If your stake for the next trade is set to exceed 3 USD, your stake will reset to the initial stake of 1 USD. If you didn't set a maximum stake, it would have increased beyond 3 USD.",
               ),
             ],
           },
@@ -6221,7 +6209,7 @@
             type: "text",
             content: [
               (0, i.NC)(
-                "With Binarytools, traders can set the profit and loss thresholds to secure potential profits and limit potential losses. This means that the trading bot will automatically stop when either the profit or loss thresholds are reached. It's a form of risk management that can potentially enhance returns. For example, if a trader sets the profit threshold at 100 USD and the strategy exceeds 100 USD of profit from all trades, then the bot will stop running.",
+                "With Dylan Trades, traders can set the profit and loss thresholds to secure potential profits and limit potential losses. This means that the trading bot will automatically stop when either the profit or loss thresholds are reached. It's a form of risk management that can potentially enhance returns. For example, if a trader sets the profit threshold at 100 USD and the strategy exceeds 100 USD of profit from all trades, then the bot will stop running.",
               ),
             ],
           },
@@ -6339,7 +6327,7 @@
             type: "text",
             content: [
               (0, i.NC)(
-                "These are the trade parameters used for Oscar’s Grind strategy in Binarytools.",
+                "These are the trade parameters used for Oscar’s Grind strategy in Dylan Trades.",
               ),
             ],
           },
@@ -6448,7 +6436,7 @@
             type: "text",
             content: [
               (0, i.NC)(
-                "With Binarytools, traders can set the profit and loss thresholds to secure potential profits and limit potential losses. This means that the trading bot will automatically stop when either the profit or loss threshold is reached. This is a form of risk management that can potentially boost successful trades whilst limiting the impact of loss. For example, if a trader sets the profit threshold at 100 USD and the strategy exceeds 100 USD of profit from all trades, then the bot will stop running.",
+                "With Dylan Trades, traders can set the profit and loss thresholds to secure potential profits and limit potential losses. This means that the trading bot will automatically stop when either the profit or loss threshold is reached. This is a form of risk management that can potentially boost successful trades whilst limiting the impact of loss. For example, if a trader sets the profit threshold at 100 USD and the strategy exceeds 100 USD of profit from all trades, then the bot will stop running.",
               ),
             ],
           },
@@ -6572,7 +6560,7 @@
             type: "text",
             content: [
               (0, i.NC)(
-                "With Binarytools, traders can set the profit and loss thresholds to secure potential profits and limit potential losses. This means that the trading bot will automatically stop when either the profit or loss threshold is reached. This is a form of risk management that can potentially boost successful trades whilst limiting the impact of loss. For example, if a trader sets the profit threshold at 100 USD and the strategy exceeds 100 USD of profit from all trades, then the bot will stop running.",
+                "With Dylan Trades, traders can set the profit and loss thresholds to secure potential profits and limit potential losses. This means that the trading bot will automatically stop when either the profit or loss threshold is reached. This is a form of risk management that can potentially boost successful trades whilst limiting the impact of loss. For example, if a trader sets the profit threshold at 100 USD and the strategy exceeds 100 USD of profit from all trades, then the bot will stop running.",
               ),
             ],
           },
@@ -6581,7 +6569,7 @@
             type: "text",
             content: [
               (0, i.NC)(
-                "Effective trading with the D'Alembert system requires careful consideration of its stake progression and risk management. Traders can automate this approach using Binarytools, setting profit and loss thresholds to ensure balanced and controlled trading. However, it is crucial for traders to assess their risk appetite, test strategies on a demo account, and align with their own trading style before transitioning to real money trading. This optimization process helps strike a balance between potential gains and losses while managing risk prudently.",
+                "Effective trading with the D'Alembert system requires careful consideration of its stake progression and risk management. Traders can automate this approach using Dylan Trades, setting profit and loss thresholds to ensure balanced and controlled trading. However, it is crucial for traders to assess their risk appetite, test strategies on a demo account, and align with their own trading style before transitioning to real money trading. This optimization process helps strike a balance between potential gains and losses while managing risk prudently.",
               ),
             ],
           },
@@ -6622,7 +6610,7 @@
                 "The Reverse Martingale strategy involves increasing your stake after each successful trade and resets to the initial stake for every losing trade as it aims to secure potential profits from consecutive wins.",
               ),
               (0, i.NC)(
-                "This article explores the Reverse Martingale strategy integrated into Binarytools, a versatile trading bot designed to trade assets such as forex, commodities, and derived indices. We will delve into the strategy's core parameters, its application, and provide essential takeaways for traders looking to use the bot effectively.",
+                "This article explores the Reverse Martingale strategy integrated into Dylan Trades, a versatile trading bot designed to trade assets such as forex, commodities, and derived indices. We will delve into the strategy's core parameters, its application, and provide essential takeaways for traders looking to use the bot effectively.",
               ),
             ],
           },
@@ -6715,7 +6703,7 @@
             type: "text",
             content: [
               (0, i.NC)(
-                "With Binarytools, traders can set the profit and loss thresholds to secure potential profits and limit potential losses. This means that the trading bot will automatically stop when either the profit or loss threshold is reached. This is a form of risk management that can potentially boost successful trades whilst limiting the impact of loss. For example, if a trader sets the profit threshold at 100 USD and the strategy exceeds 100 USD of profit from all trades, then the bot will stop running.",
+                "With Dylan Trades, traders can set the profit and loss thresholds to secure potential profits and limit potential losses. This means that the trading bot will automatically stop when either the profit or loss threshold is reached. This is a form of risk management that can potentially boost successful trades whilst limiting the impact of loss. For example, if a trader sets the profit threshold at 100 USD and the strategy exceeds 100 USD of profit from all trades, then the bot will stop running.",
               ),
             ],
           },
@@ -6763,7 +6751,7 @@
                 "The 1-3-2-6 strategy aims to maximise potential profits with four consecutive successful trades. One unit is equal to the amount of the initial stake. The stake will adjust from 1 unit to 3 units after the first successful trade, then to 2 units after your second successful trade, and to 6 units after the third successful trade. The stake for the next trade will reset to the initial stake if there is a losing trade or a completion of the trade cycle.",
               ),
               (0, i.NC)(
-                "This article explores the strategy integrated into Binarytools, a versatile trading bot designed to trade assets such as Forex, Commodities, and Derived Indices. We will delve into the strategy's core parameters, its application, and provide essential takeaways for traders looking to use the bot effectively.",
+                "This article explores the strategy integrated into Dylan Trades, a versatile trading bot designed to trade assets such as Forex, Commodities, and Derived Indices. We will delve into the strategy's core parameters, its application, and provide essential takeaways for traders looking to use the bot effectively.",
               ),
             ],
           },
@@ -6846,7 +6834,7 @@
             type: "text",
             content: [
               (0, i.NC)(
-                "With Binarytools, traders can set the profit and loss thresholds to secure potential profits and limit potential losses. This means that the trading bot will automatically stop when either the profit or loss threshold is reached. This is a form of risk management that can potentially boost successful trades whilst limiting the impact of loss. For example, if a trader sets the profit threshold at 100 USD and the strategy exceeds 100 USD of profit from all trades, then the bot will stop running.",
+                "With Dylan Trades, traders can set the profit and loss thresholds to secure potential profits and limit potential losses. This means that the trading bot will automatically stop when either the profit or loss threshold is reached. This is a form of risk management that can potentially boost successful trades whilst limiting the impact of loss. For example, if a trader sets the profit threshold at 100 USD and the strategy exceeds 100 USD of profit from all trades, then the bot will stop running.",
               ),
             ],
           },
@@ -20033,7 +20021,7 @@ Based on last ${r} digits`,
               {
                 type: "text",
                 content: (0, m.NC)(
-                  "DollarPrinter is a web-based strategy builder for trading digital options. It’s a platform where you can build your own automated trading bot using drag-and-drop 'blocks'.",
+                  "Dylan Trades is a web-based strategy builder for trading digital options. It’s a platform where you can build your own automated trading bot using drag-and-drop 'blocks'.",
                 ),
               },
             ],
@@ -20940,7 +20928,7 @@ Based on last ${r} digits`,
         el = {
           text: () => [
             (0, m.NC)(
-              "This block is mandatory. Only one copy of this block is allowed. It is added to the canvas by default when you open Binarytools.",
+              "This block is mandatory. Only one copy of this block is allowed. It is added to the canvas by default when you open Dylan Trades.",
             ),
             (0, m.NC)(
               "After defining trade parameters and trade options, you may want to instruct your bot to purchase contracts when specific conditions are met. To do that you can use conditional blocks and indicators blocks to help your bot to make decisions.",
@@ -24153,7 +24141,7 @@ Based on last ${r} digits`,
                     "Deriv isn't quite ready for real accounts",
                   ),
                   message: (0, m.NC)(
-                    "Please switch to your demo account to run your Binarytools.",
+                    "Please switch to your demo account to run your Dylan Trades.",
                   ),
                 }),
                 (this.is_dialog_open = !0));
@@ -24177,7 +24165,7 @@ Based on last ${r} digits`,
                 (this.dialog_options = {
                   title: (0, m.NC)("Import error"),
                   message: (0, m.NC)(
-                    "This strategy is currently not compatible with Binarytools.",
+                    "This strategy is currently not compatible with Dylan Trades.",
                   ),
                 }),
                 (this.is_dialog_open = !0));
@@ -30279,7 +30267,7 @@ Based on last ${r} digits`,
           980: "1f1ed9fd",
           993: "26688fbc",
         }[e] +
-        ".js?v=naotrades_layout"
+        ".js?v=dylantrades_layout"
       );
     }),
     (n.miniCssF = function (e) {
